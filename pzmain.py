@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog, ttk
+from tkinter import messagebox, simpledialog
 import sqlite3
 from datetime import datetime
 
@@ -28,189 +28,77 @@ class TaskManagerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Task Manager")
-        self.root.geometry("800x600")
-        self.root.configure(bg='#f0f0f0')
-        
-        
-        self.style = {
-            'bg_color': '#f0f0f0',
-            'button_bg': '#4a90e2',
-            'button_fg': 'white',
-            'button_active_bg': '#357abd',
-            'label_fg': '#333333',
-            'entry_bg': 'white',
-            'font_family': ('Helvetica', 10),
-            'header_font': ('Helvetica', 12, 'bold')
-        }
+
         
         init_db()
+
         
-        self.login_frame = tk.Frame(self.root, bg=self.style['bg_color'])
-        self.register_frame = tk.Frame(self.root, bg=self.style['bg_color'])
-        self.task_frame = tk.Frame(self.root, bg=self.style['bg_color'])
-        self.admin_frame = tk.Frame(self.root, bg=self.style['bg_color'])
+        self.login_frame = tk.Frame(self.root)
+        self.register_frame = tk.Frame(self.root)
+        self.task_frame = tk.Frame(self.root)
+        self.admin_frame = tk.Frame(self.root)
+
         
         self.create_login_ui()
 
     def create_login_ui(self):
-        
-        header = tk.Label(self.login_frame, text="Система управления задачами", 
-                         font=self.style['header_font'], bg=self.style['bg_color'],
-                         fg=self.style['label_fg'])
-        header.grid(row=0, column=0, columnspan=2, pady=20)
+        tk.Label(self.login_frame, text="Имя пользователя").grid(row=0, column=0)
+        self.username_entry = tk.Entry(self.login_frame)
+        self.username_entry.grid(row=0, column=1)
 
-        
-        tk.Label(self.login_frame, text="Имя пользователя", 
-                font=self.style['font_family'], bg=self.style['bg_color'],
-                fg=self.style['label_fg']).grid(row=1, column=0, pady=5)
-        self.username_entry = tk.Entry(self.login_frame, font=self.style['font_family'],
-                                     bg=self.style['entry_bg'])
-        self.username_entry.grid(row=1, column=1, pady=5)
+        tk.Label(self.login_frame, text="Пароль").grid(row=1, column=0)
+        self.password_entry = tk.Entry(self.login_frame, show='*')
+        self.password_entry.grid(row=1, column=1)
 
-        tk.Label(self.login_frame, text="Пароль", 
-                font=self.style['font_family'], bg=self.style['bg_color'],
-                fg=self.style['label_fg']).grid(row=2, column=0, pady=5)
-        self.password_entry = tk.Entry(self.login_frame, show='*',
-                                     font=self.style['font_family'],
-                                     bg=self.style['entry_bg'])
-        self.password_entry.grid(row=2, column=1, pady=5)
+        tk.Button(self.login_frame, text="Войти", command=self.login).grid(row=2, column=0, columnspan=2)
+        tk.Button(self.login_frame, text="Зарегистрироваться", command=self.show_register_ui).grid(row=3, column=0, columnspan=2)
 
-        
-        login_btn = tk.Button(self.login_frame, text="Войти", 
-                            command=self.login,
-                            bg=self.style['button_bg'],
-                            fg=self.style['button_fg'],
-                            font=self.style['font_family'],
-                            width=20,
-                            relief=tk.FLAT)
-        login_btn.grid(row=3, column=0, columnspan=2, pady=10)
-
-        register_btn = tk.Button(self.login_frame, text="Зарегистрироваться",
-                               command=self.show_register_ui,
-                               bg=self.style['button_bg'],
-                               fg=self.style['button_fg'],
-                               font=self.style['font_family'],
-                               width=20,
-                               relief=tk.FLAT)
-        register_btn.grid(row=4, column=0, columnspan=2, pady=5)
-
-        self.login_frame.pack(pady=50)
+        self.login_frame.pack(pady=20)
 
     def show_register_ui(self):
         self.login_frame.pack_forget()
-        self.register_frame = tk.Frame(self.root, bg=self.style['bg_color'])
-        self.register_frame.pack(pady=50, padx=50, fill='both', expand=True)
+        self.register_frame.pack(pady=20)
 
-        
-        header = tk.Label(self.register_frame, 
-                         text="Регистрация нового пользователя",
-                         font=self.style['header_font'],
-                         bg=self.style['bg_color'],
-                         fg=self.style['label_fg'])
-        header.pack(pady=(0, 20))
+        tk.Label(self.register_frame, text="Имя пользователя").grid(row=0, column=0)
+        self.register_username_entry = tk.Entry(self.register_frame)
+        self.register_username_entry.grid(row=0, column=1)
 
-        
-        fields_frame = tk.Frame(self.register_frame, bg=self.style['bg_color'])
-        fields_frame.pack(fill='both', padx=20)
+        tk.Label(self.register_frame, text="Пароль").grid(row=1, column=0)
+        self.register_password_entry = tk.Entry(self.register_frame, show='*')
+        self.register_password_entry.grid(row=1, column=1)
 
-        
-        tk.Label(fields_frame, text="Имя пользователя",
-                font=self.style['font_family'],
-                bg=self.style['bg_color'],
-                fg=self.style['label_fg']).pack(anchor='w', pady=(5,0))
-        self.register_username_entry = tk.Entry(fields_frame,
-                                              font=self.style['font_family'],
-                                              bg=self.style['entry_bg'],
-                                              width=30)
-        self.register_username_entry.pack(fill='x', pady=(0,10))
+        tk.Label(self.register_frame, text="Роль (admin/user)").grid(row=2, column=0)
+        self.role_entry = tk.Entry(self.register_frame)
+        self.role_entry.grid(row=2, column=1)
 
-        
-        tk.Label(fields_frame, text="Пароль",
-                font=self.style['font_family'],
-                bg=self.style['bg_color'],
-                fg=self.style['label_fg']).pack(anchor='w', pady=(5,0))
-        self.register_password_entry = tk.Entry(fields_frame,
-                                              show='*',
-                                              font=self.style['font_family'],
-                                              bg=self.style['entry_bg'],
-                                              width=30)
-        self.register_password_entry.pack(fill='x', pady=(0,10))
-
-        
-        tk.Label(fields_frame, text="Роль",
-                font=self.style['font_family'],
-                bg=self.style['bg_color'],
-                fg=self.style['label_fg']).pack(anchor='w', pady=(5,0))
-        self.role_var = tk.StringVar(value='user')
-        role_frame = tk.Frame(fields_frame, bg=self.style['bg_color'])
-        role_frame.pack(fill='x', pady=(0,10))
-        
-        tk.Radiobutton(role_frame, text="Пользователь",
-                      variable=self.role_var,
-                      value='user',
-                      font=self.style['font_family'],
-                      bg=self.style['bg_color']).pack(side='left', padx=10)
-        tk.Radiobutton(role_frame, text="Администратор",
-                      variable=self.role_var,
-                      value='admin',
-                      font=self.style['font_family'],
-                      bg=self.style['bg_color']).pack(side='left')
-
-        
-        button_frame = tk.Frame(self.register_frame, bg=self.style['bg_color'])
-        button_frame.pack(pady=20)
-
-        tk.Button(button_frame,
-                 text="Зарегистрироваться",
-                 command=self.register_user,
-                 bg=self.style['button_bg'],
-                 fg=self.style['button_fg'],
-                 font=self.style['font_family'],
-                 width=20,
-                 relief=tk.FLAT).pack(pady=5)
-
-        tk.Button(button_frame,
-                 text="Назад",
-                 command=self.back_to_login,
-                 bg=self.style['button_bg'],
-                 fg=self.style['button_fg'],
-                 font=self.style['font_family'],
-                 width=20,
-                 relief=tk.FLAT).pack(pady=5)
+        tk.Button(self.register_frame, text="Зарегистрироваться", command=self.register_user).grid(row=3, column=0, columnspan=2)
 
     def login(self):
         username = self.username_entry.get().strip()
         password = self.password_entry.get().strip()
-        
+
         if not username or not password:
-            messagebox.showerror("Ошибка", "Пожалуйста, заполните все поля")
+            messagebox.showerror("Ошибка", "Имя пользователя и пароль не могут быть пустыми.")
             return
-        
-        try:
-            with sqlite3.connect("tasks_db.db") as db:
-                cursor = db.cursor()
-                cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", 
-                             (username, password))
-                user = cursor.fetchone()
-                
-                if user:
-                    self.current_user = user
-                    self.username_entry.delete(0, tk.END)
-                    self.password_entry.delete(0, tk.END)
-                    if user[3] == 'admin':
-                        self.show_admin_ui(user)
-                    else:
-                        self.show_user_ui(user)
+
+        with sqlite3.connect("tasks_db.db") as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+            user = cursor.fetchone()
+
+            if user:
+                messagebox.showinfo("Успех", f"Добро пожаловать, {user[1]}!")
+                if user[3] == 'admin':
+                    self.show_admin_ui(user)
                 else:
-                    messagebox.showerror("Ошибка", "Неверное имя пользователя или пароль")
-        except sqlite3.Error as e:
-            messagebox.showerror("Ошибка базы данных", f"Ошибка при входе: {str(e)}")
-            print(f"Database error during login: {str(e)}")
+                    self.show_user_ui(user)
+            else:
+                messagebox.showerror("Ошибка", "Неверное имя пользователя или пароль.")
 
     def register_user(self):
         username = self.register_username_entry.get().strip()
         password = self.register_password_entry.get().strip()
-        role = self.role_var.get().strip().lower()
+        role = self.role_entry.get().strip().lower()
 
         if not username or not password:
             messagebox.showerror("Ошибка", "Имя пользователя и пароль не могут быть пустыми.")
@@ -234,717 +122,174 @@ class TaskManagerApp:
     def show_admin_ui(self, user):
         self.login_frame.pack_forget()
         self.register_frame.pack_forget()
-        self.task_frame.pack_forget()
-        self.admin_frame.pack(pady=20, padx=40)
+        self.admin_frame.pack(pady=20)
 
-       
-        for widget in self.admin_frame.winfo_children():
-            widget.destroy()
+        tk.Button(self.admin_frame, text="Добавить нового сотрудника", command=self.add_employee).grid(row=0, column=0)
+        tk.Button(self.admin_frame, text="Выдать задачу", command=self.assign_task).grid(row=1, column=0)
+        tk.Button(self.admin_frame, text="Изменить статус задачи", command=self.change_task_status).grid(row=2, column=0)
+        tk.Button(self.admin_frame, text="Редактировать задачу", command=self.update_task).grid(row=3, column=0)
+        tk.Button(self.admin_frame, text="Удалить задачу", command=self.delete_task).grid(row=4, column=0)
+        tk.Button(self.admin_frame, text="Отчет о выполненных задачах", command=self.print_completed_tasks_report).grid(row=5, column=0)
+        tk.Button(self.admin_frame, text="Отчет по задачам сотрудника", command=self.print_employee_tasks_report).grid(row=6, column=0)
 
-        
-        style = ttk.Style()
-        style.configure('Admin.TButton',
-                       padding=(20, 10),
-                       font=('Helvetica', 10),
-                       background='#4a90e2',
-                       foreground='white',
-                       width=30)
-        style.map('Admin.TButton',
-                 background=[('active', '#357abd')],
-                 foreground=[('active', 'white')])
-
-        
-        header = ttk.Label(self.admin_frame, 
-                          text=f"Панель администратора - {user[1]}", 
-                          font=('Helvetica', 14, 'bold'))
-        header.grid(row=0, column=0, pady=(0, 20), columnspan=2)
-
-        
-        buttons = [
-            ("Добавить нового сотрудника", self.add_employee),
-            ("Выдать задачу", self.assign_task),
-            ("Изменить статус задачи", self.change_task_status),
-            ("Редактировать задачу", self.update_task),
-            ("Удалить задачу", self.delete_task),
-            ("Отчет о выполненных задачах", self.print_completed_tasks_report),
-            ("Отчет по задачам сотрудника", self.print_employee_tasks_report),
-            ("Вернуться", self.back_to_login)
-        ]
-
-        
-        for i, (text, command) in enumerate(buttons):
-            row = (i // 2) + 1 
-            col = i % 2
-            ttk.Button(self.admin_frame, 
-                      text=text,
-                      command=command,
-                      style='Admin.TButton').grid(row=row, 
-                                                column=col,
-                                                padx=10,
-                                                pady=5,
-                                                sticky='nsew')
-
-        
-        self.admin_frame.grid_columnconfigure(0, weight=1)
-        self.admin_frame.grid_columnconfigure(1, weight=1)
+        tk.Button(self.admin_frame, text="Вернуться", command=self.back_to_login).grid(row=7, column=0)
 
     def show_user_ui(self, user):
         self.login_frame.pack_forget()
         self.register_frame.pack_forget()
-        self.task_frame.pack(pady=20, padx=40)
+        self.task_frame.pack(pady=20)
 
-        
-        for widget in self.task_frame.winfo_children():
-            widget.destroy()
-
-        
-        style = ttk.Style()
-        style.configure('UserButton.TButton',
-                      font=('Helvetica', 10),
-                      padding=(20, 10))
-
-        
-        header = ttk.Label(self.task_frame, 
-                          text=f"Личный кабинет - {user[1]}", 
-                          font=('Helvetica', 14, 'bold'))
-        header.grid(row=0, column=0, pady=(0, 20))
-
-        
-        button_texts = [
-            ("Посмотреть свои задачи", lambda: self.view_tasks(user[0])),
-            ("Изменить статус задачи", self.change_user_task_status),
-            ("Вывести отчет о проделанной работе", lambda: self.print_work_report(user[0])),
-            ("Вернуться", self.back_to_login)
-        ]
-
-        for i, (text, command) in enumerate(button_texts):
-            btn = ttk.Button(self.task_frame,
-                           text=text,
-                           command=command,
-                           style='UserButton.TButton')
-            btn.grid(row=i+1, column=0, padx=20, pady=5, sticky='ew')
-
-        
-        self.task_frame.grid_columnconfigure(0, weight=1)
-
-        
-        self.view_tasks(user[0])
+        tk.Button(self.task_frame, text="Посмотреть свои задачи", command=lambda: self.view_tasks(user[0])).grid(row=0, column=0)
+        tk.Button(self.task_frame, text="Изменить статус задачи", command=self.change_user_task_status).grid(row=1, column=0)
+        tk.Button(self.task_frame, text="Вывести отчет о проделанной работе", command=lambda: self.print_work_report(user[0])).grid(row=2, column=0)
+        tk.Button(self.task_frame, text="Вернуться", command=self.back_to_login).grid(row=3, column=0)
 
     def back_to_login(self):
-        
         self.admin_frame.pack_forget()
         self.task_frame.pack_forget()
-        self.register_frame.pack_forget()
-        self.login_frame.pack_forget()
-        
-        
-        for widget in self.login_frame.winfo_children():
-            widget.destroy()
-        
-        
-        self.create_login_ui()
-
-    def create_form_window(self, title, fields, callback):
-       
-        form_window = tk.Toplevel(self.root)
-        form_window.title(title)
-        form_window.geometry("400x400")
-        form_window.configure(bg=self.style['bg_color'])
-        
-        
-        form_window.transient(self.root)
-        form_window.grab_set()
-        
-        
-        header = ttk.Label(form_window, 
-                          text=title,
-                          font=('Helvetica', 14, 'bold'))
-        header.pack(pady=(20, 20))
-        
-        
-        entries = {}
-        for field_name, field_type in fields.items():
-            frame = tk.Frame(form_window, bg=self.style['bg_color'])
-            frame.pack(fill='x', padx=20, pady=5)
-            
-            label = ttk.Label(frame, 
-                            text=field_name,
-                            font=self.style['font_family'])
-            label.pack(anchor='w')
-            
-            if field_type == 'text':
-                entry = ttk.Entry(frame, width=40)
-            elif field_type == 'password':
-                entry = ttk.Entry(frame, width=40, show='*')
-            entries[field_name] = entry
-            entry.pack(fill='x', pady=(2, 5))
-        
-        
-        button_frame = tk.Frame(form_window, bg=self.style['bg_color'])
-        button_frame.pack(pady=20)
-        
-        def submit():
-            values = {name: entry.get().strip() for name, entry in entries.items()}
-            form_window.destroy()
-            callback(values)
-            
-        def cancel():
-            form_window.destroy()
-        
-        
-        ttk.Button(button_frame,
-                  text="Подтвердить",
-                  command=submit,
-                  style='UserButton.TButton').pack(side='left', padx=5)
-                  
-        ttk.Button(button_frame,
-                  text="Отмена",
-                  command=cancel,
-                  style='UserButton.TButton').pack(side='left', padx=5)
-        
-        
-        form_window.update_idletasks()
-        width = form_window.winfo_width()
-        height = form_window.winfo_height()
-        x = (form_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (form_window.winfo_screenheight() // 2) - (height // 2)
-        form_window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        self.login_frame.pack(pady=20)
 
     def add_employee(self):
-        def handle_submit(values):
-            username = values['Имя пользователя']
-            password = values['Пароль']
-            role = values['Роль'].lower()
-            
-            if username and password and role in ('admin', 'user'):
-                try:
-                    with sqlite3.connect("tasks_db.db") as db:
-                        cursor = db.cursor()
-                        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", 
-                                     (username, password, role))
-                        db.commit()
-                        messagebox.showinfo("Успех", "Сотрудник добавлен!")
-                except sqlite3.IntegrityError:
-                    messagebox.showerror("Ошибка", "Имя пользователя уже занято.")
-            else:
-                messagebox.showerror("Ошибка", "Пожалуйста, введите корректные данные.")
-            self.show_admin_ui(self.current_user)
-            
-        fields = {
-            'Имя пользователя': 'text',
-            'Пароль': 'password',
-            'Роль': 'text'
-        }
-        self.create_form_window("Добавить сотрудника", fields, handle_submit)
+        username = simpledialog.askstring("Добавить сотрудника", "Введите имя пользователя:")
+        password = simpledialog.askstring("Добавить сотрудника", "Введите пароль:")
+        role = simpledialog.askstring("Добавить сотрудника", "Введите роль (admin/user):").lower()
+
+        if username and password and role in ('admin', 'user'):
+            try:
+                with sqlite3.connect("tasks_db.db") as db:
+                    cursor = db.cursor()
+                    cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", (username, password, role))
+                    db.commit()
+                    messagebox.showinfo("Успех", "Сотрудник добавлен!")
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Ошибка", "Имя пользователя уже занято.")
+        else:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные данные.")
 
     def assign_task(self):
-        def handle_submit(values):
-            username = values['Имя пользователя'].strip()
-            description = values['Описание задачи'].strip()
-            
-            if not username or not description:
-                messagebox.showerror("Ошибка", "Пожалуйста, заполните все поля.")
-                return
-            
-            if len(description) > self.MAX_TASK_DESC_LENGTH:
-                messagebox.showerror("Ошибка", f"Описание задачи не может быть длиннее {self.MAX_TASK_DESC_LENGTH} символов.")
-                return
-            
-            try:
-                with sqlite3.connect("tasks_db.db") as db:
-                    cursor = db.cursor()
-                    
-                    cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
-                    target_user = cursor.fetchone()
-                    
-                    if target_user:
-                        
-                        cursor.execute("""
-                            INSERT INTO tasks (user_id, description, status, created_at, created_by) 
-                            VALUES (?, ?, 'в работе', datetime('now', 'localtime'), ?)
-                        """, (target_user[0], description, self.current_user[1]))
-                        db.commit()
-                        messagebox.showinfo("Успех", "Задача добавлена!")
-                        
-                        
-                        if hasattr(self, 'task_tree') and self.task_tree.winfo_exists():
-                            self.refresh_tasks(target_user[0])
-                    else:
-                        messagebox.showerror("Ошибка", "Пользователь не найден.")
-            except sqlite3.Error as e:
-                messagebox.showerror("Ошибка базы данных", f"Не удалось добавить задачу: {str(e)}")
-                print(f"Database error: {str(e)}")
-            except Exception as e:
-                messagebox.showerror("Ошибка", f"Произошла ошибка: {str(e)}")
-                print(f"General error: {str(e)}")
-        
-        fields = {
-            'Имя пользователя': 'text',
-            'Описание задачи': 'text'
-        }
-        self.create_form_window("Выдать задачу", fields, handle_submit)
+        username = simpledialog.askstring("Выдать задачу", "Введите имя пользователя сотрудника:")
+        description = simpledialog.askstring("Выдать задачу", "Введите описание задачи:")
+
+        if username and description:
+            with sqlite3.connect("tasks_db.db") as db:
+                cursor = db.cursor()
+                cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
+                user = cursor.fetchone()
+
+                if user:
+                    cursor.execute("INSERT INTO tasks (user_id, description, created_by) VALUES (?, ?, ?)", (user[0], description, self.username_entry.get()))
+                    db.commit()
+                    messagebox.showinfo("Успех", f"Задача выдана сотруднику {username}!")
+                else:
+                    messagebox.showerror("Ошибка", "Сотрудник не найден.")
+        else:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные данные.")
 
     def change_task_status(self):
-        def handle_submit(values):
-            task_id = values['ID задачи'].strip()
-            new_status = values['Новый статус'].strip().lower()
-            
-            try:
-                task_id = int(task_id)
-                if new_status in ['в работе', 'выполнено', 'ожидает']:
-                    with sqlite3.connect("tasks_db.db") as db:
-                        cursor = db.cursor()
-                        cursor.execute("SELECT user_id, status FROM tasks WHERE id = ?", (task_id,))
-                        task = cursor.fetchone()
-                        if task:
-                            
-                            completed_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S') if new_status == 'выполнено' else None
-                            cursor.execute("""
-                                UPDATE tasks 
-                                SET status = ?, 
-                                    completed_at = ?
-                                WHERE id = ?
-                            """, (new_status, completed_at, task_id))
-                            db.commit()
-                            messagebox.showinfo("Успех", "Статус задачи обновлен!")
-                            
-                            if hasattr(self, 'task_tree') and self.task_tree.winfo_exists():
-                                self.refresh_tasks(task[0])  
-                        else:
-                            messagebox.showerror("Ошибка", "Задача не найдена.")
-                else:
-                    messagebox.showerror("Ошибка", "Некорректный статус. Используйте: в работе, выполнено, ожидает")
-            except ValueError:
-                messagebox.showerror("Ошибка", "ID задачи должен быть числом.")
-            except sqlite3.Error as e:
-                messagebox.showerror("Ошибка базы данных", f"Ошибка при обновлении статуса: {str(e)}")
-                print(f"Database error during status update: {str(e)}")
-        
-        fields = {
-            'ID задачи': 'text',
-            'Новый статус': 'text'
-        }
-        self.create_form_window("Изменить статус задачи", fields, handle_submit)
+        task_id = simpledialog.askinteger("Изменение статуса", "Введите ID задачи:")
+        new_status = simpledialog.askstring("Изменение статуса", "Введите новый статус (pending/completed/in_progress):")
+
+        if new_status in ['pending', 'completed', 'in_progress']:
+            with sqlite3.connect("tasks_db.db") as db:
+                cursor = db.cursor()
+                cursor.execute("UPDATE tasks SET status = ?, completed_at = ? WHERE id = ?",
+                               (new_status, datetime.now() if new_status == 'completed' else None, task_id))
+                db.commit()
+                messagebox.showinfo("Успех", "Статус задачи изменен!")
+        else:
+            messagebox.showerror("Ошибка", "Некорректный статус задачи.")
 
     def change_user_task_status(self):
-        def handle_submit(values):
-            task_id = values['ID задачи']
-            new_status = values['Новый статус']
-            
-            try:
-                task_id = int(task_id)
-                if new_status in ['в работе', 'выполнено', 'ожидает']:
-                    with sqlite3.connect("tasks_db.db") as db:
-                        cursor = db.cursor()
-                        cursor.execute("SELECT status FROM tasks WHERE id = ? AND user_id = ?", 
-                                     (task_id, self.current_user[0]))
-                        task = cursor.fetchone()
-                        if task:
-                            
-                            completed_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S') if new_status == 'выполнено' else None
-                            cursor.execute("""
-                                UPDATE tasks 
-                                SET status = ?, 
-                                    completed_at = ?
-                                WHERE id = ? AND user_id = ?
-                            """, (new_status, completed_at, task_id, self.current_user[0]))
-                            db.commit()
-                            messagebox.showinfo("Успех", "Статус задачи обновлен!")
-                            
-                            self.refresh_tasks(self.current_user[0])
-                        else:
-                            messagebox.showerror("Ошибка", "Задача не найдена или не принадлежит вам.")
-                else:
-                    messagebox.showerror("Ошибка", "Некорректный статус. Используйте: в работе, выполнено, ожидает")
-            except ValueError:
-                messagebox.showerror("Ошибка", "ID задачи должен быть числом.")
-            self.show_user_ui(self.current_user)
-            
-        fields = {
-            'ID задачи': 'text',
-            'Новый статус': 'text'
-        }
-        self.create_form_window("Изменить статус задачи", fields, handle_submit)
+
+        task_id = simpledialog.askinteger("Изменение статуса", "Введите ID задачи:")
+        new_status = simpledialog.askstring("Изменение статуса", "Введите новый статус (pending/completed/in_progress):")
+
+        if new_status in ['pending', 'completed', 'in_progress']:
+            with sqlite3.connect("tasks_db.db") as db:
+                cursor = db.cursor()
+                cursor.execute("UPDATE tasks SET status = ?, completed_at = ? WHERE id = ?",
+                               (new_status, datetime.now() if new_status == 'completed' else None, task_id))
+                db.commit()
+                messagebox.showinfo("Успех", "Статус задачи изменен!")
+        else:
+            messagebox.showerror("Ошибка", "Некорректный статус задачи.")
 
     def update_task(self):
-        def handle_submit(values):
-            task_id = values['ID задачи']
-            new_description = values['Новое описание']
-            
-            try:
-                task_id = int(task_id)
-                if new_description:
-                    with sqlite3.connect("tasks_db.db") as db:
-                        cursor = db.cursor()
-                        cursor.execute("UPDATE tasks SET description = ? WHERE id = ?", 
-                                     (new_description, task_id))
-                        if cursor.rowcount > 0:
-                            db.commit()
-                            messagebox.showinfo("Успех", "Задача обновлена!")
-                        else:
-                            messagebox.showerror("Ошибка", "Задача не найдена.")
-                else:
-                    messagebox.showerror("Ошибка", "Описание не может быть пустым.")
-            except ValueError:
-                messagebox.showerror("Ошибка", "ID задачи должен быть числом.")
-            self.show_admin_ui(self.current_user)
-            
-        fields = {
-            'ID задачи': 'text',
-            'Новое описание': 'text'
-        }
-        self.create_form_window("Обновить задачу", fields, handle_submit)
+        task_id = simpledialog.askinteger("Редактирование задачи", "Введите ID задачи:")
+        new_description = simpledialog.askstring("Редактирование задачи", "Введите новое описание задачи:")
+
+        if new_description and len(new_description) <= self.MAX_TASK_DESC_LENGTH:
+            with sqlite3.connect("tasks_db.db") as db:
+                cursor = db.cursor()
+                cursor.execute("UPDATE tasks SET description = ? WHERE id = ?", (new_description, task_id))
+                db.commit()
+                messagebox.showinfo("Успех", "Задача успешно обновлена!")
+        else:
+            messagebox.showerror("Ошибка", "Описание задачи не может быть пустым или превышать 200 символов.")
 
     def delete_task(self):
-        def handle_submit(values):
-            task_id = values['ID задачи']
-            
-            try:
-                task_id = int(task_id)
-                with sqlite3.connect("tasks_db.db") as db:
-                    cursor = db.cursor()
-                    cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
-                    if cursor.rowcount > 0:
-                        db.commit()
-                        messagebox.showinfo("Успех", "Задача удалена!")
-                    else:
-                        messagebox.showerror("Ошибка", "Задача не найдена.")
-            except ValueError:
-                messagebox.showerror("Ошибка", "ID задачи должен быть числом.")
-            self.show_admin_ui(self.current_user)
-            
-        fields = {
-            'ID задачи': 'text'
-        }
-        self.create_form_window("Удалить задачу", fields, handle_submit)
+        task_id = simpledialog.askinteger("Удаление задачи", "Введите ID задачи:")
+        with sqlite3.connect("tasks_db.db") as db:
+            cursor = db.cursor()
+            cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+            db.commit()
+            messagebox.showinfo("Успех", "Задача успешно удалена!")
 
     def print_completed_tasks_report(self):
-        fields = {
-            'Дата начала': 'text',
-            'Дата окончания': 'text'
-        }
-        self.create_form_window("Отчет о выполненных задачах", fields, self.handle_completed_tasks_report)
+        start_date = simpledialog.askstring("Отчет", "Введите дату начала (гггг-мм-дд):")
+        end_date = simpledialog.askstring("Отчет", "Введите дату окончания (гггг-мм-дд):")
 
-    def handle_completed_tasks_report(self, values):
-        start_date = values['Дата начала']
-        end_date = values['Дата окончания']
-        
-        try:
-            
-            try:
-                datetime.strptime(start_date, '%Y-%m-%d')
-                datetime.strptime(end_date, '%Y-%m-%d')
-            except ValueError:
-                messagebox.showerror("Ошибка", "Неверный формат даты. Используйте формат ГГГГ-ММ-ДД")
-                return
+        report = ""
+        with sqlite3.connect("tasks_db.db") as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM tasks WHERE status = 'completed' AND completed_at BETWEEN ? AND ?", (start_date, end_date))
+            tasks = cursor.fetchall()
+            for task in tasks:
+                report += f"Задача ID: {task[0]}, Описание: {task[2]}, Статус: {task[3]}, Создана кем: {task[6]}, Дата создания: {task[4]}, Дата выполнения: {task[5]}\n"
 
-            with sqlite3.connect("tasks_db.db") as db:
-                cursor = db.cursor()
-                cursor.execute("""
-                    SELECT t.id, t.description, t.status, t.created_at, t.completed_at, u.username
-                    FROM tasks t
-                    LEFT JOIN users u ON t.user_id = u.id
-                    WHERE t.status = 'выполнено'
-                    AND date(t.completed_at) BETWEEN date(?) AND date(?)
-                    ORDER BY t.completed_at
-                """, (start_date, end_date))
-                
-                tasks = cursor.fetchall()
-                if tasks:
-                    report = f"Отчет о выполненных задачах с {start_date} по {end_date}\n"
-                    report += f"Дата создания отчета: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-                    report += "=" * 80 + "\n\n"
-                    
-                    for task in tasks:
-                        report += f"ID задачи: {task[0]}\n"
-                        report += f"Исполнитель: {task[5]}\n"
-                        report += f"Описание: {task[1]}\n"
-                        report += f"Дата создания: {task[3]}\n"
-                        report += f"Дата выполнения: {task[4]}\n"
-                        report += "-" * 40 + "\n"
-                    
-                    
-                    filename = f"completed_tasks_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-                    with open(filename, 'w', encoding='utf-8') as f:
-                        f.write(report)
-                    
-                    
-                    report_window = tk.Toplevel(self.root)
-                    report_window.title("Отчет о выполненных задачах")
-                    report_window.geometry("800x600")
-                    report_window.configure(bg=self.style['bg_color'])
-                    
-                    
-                    text_frame = tk.Frame(report_window, bg=self.style['bg_color'])
-                    text_frame.pack(fill='both', expand=True, padx=20, pady=20)
-                    
-                    text_widget = tk.Text(text_frame, wrap='word', font=('Courier', 10))
-                    scrollbar = ttk.Scrollbar(text_frame, orient='vertical', command=text_widget.yview)
-                    text_widget.configure(yscrollcommand=scrollbar.set)
-                    
-                    text_widget.pack(side='left', fill='both', expand=True)
-                    scrollbar.pack(side='right', fill='y')
-                    
-                    text_widget.insert('1.0', report)
-                    text_widget.config(state='disabled')
-                    
-                    messagebox.showinfo("Успех", f"Отчет сохранен в файл: {filename}")
-                else:
-                    messagebox.showinfo("Информация", "Нет выполненных задач за указанный период")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при создании отчета: {str(e)}")
+        if report:
+            with open("completed_tasks_report.txt", "w") as file:
+                file.write(report)
+            messagebox.showinfo("Отчет", f"Отчет сохранен в файл 'completed_tasks_report.txt'.\n{report}")
+        else:
+            messagebox.showinfo("Отчет", "Нет выполненных задач за указанный период.")
 
     def print_employee_tasks_report(self):
-        fields = {
-            'Имя сотрудника': 'text'
-        }
-        self.create_form_window("Отчет по задачам сотрудника", fields, self.handle_employee_tasks_report)
+        username = simpledialog.askstring("Отчет", "Введите имя пользователя сотрудника:")
+        report = ""
 
-    def handle_employee_tasks_report(self, values):
-        username = values['Имя сотрудника']
-        
-        try:
-            with sqlite3.connect("tasks_db.db") as db:
-                cursor = db.cursor()
-                cursor.execute("""
-                    SELECT t.id, t.description, t.status, t.created_at, t.completed_at, u.username
-                    FROM tasks t
-                    INNER JOIN users u ON t.user_id = u.id
-                    WHERE u.username = ?
-                    ORDER BY t.created_at
-                """, (username,))
-                
+        with sqlite3.connect("tasks_db.db") as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+
+            if user:
+                cursor.execute("SELECT * FROM tasks WHERE user_id = ?", (user[0],))
                 tasks = cursor.fetchall()
-                if tasks:
-                    report = f"Отчет по задачам сотрудника: {username}\n"
-                    report += f"Дата создания отчета: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-                    report += "=" * 80 + "\n\n"
-                    
-                    for task in tasks:
-                        report += f"ID задачи: {task[0]}\n"
-                        report += f"Описание: {task[1]}\n"
-                        report += f"Статус: {task[2]}\n"
-                        report += f"Дата создания: {task[3]}\n"
-                        report += f"Дата выполнения: {task[4] or 'Не выполнено'}\n"
-                        report += f"Создана: {task[5]}\n"
-                        report += "-" * 40 + "\n"
-                    
-                    
-                    filename = f"employee_tasks_report_{username}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-                    with open(filename, 'w', encoding='utf-8') as f:
-                        f.write(report)
-                    
-                    
-                    report_window = tk.Toplevel(self.root)
-                    report_window.title(f"Отчет по задачам сотрудника: {username}")
-                    report_window.geometry("800x600")
-                    report_window.configure(bg=self.style['bg_color'])
-                    
-                    # Add text widget with scrollbar
-                    text_frame = tk.Frame(report_window, bg=self.style['bg_color'])
-                    text_frame.pack(fill='both', expand=True, padx=20, pady=20)
-                    
-                    text_widget = tk.Text(text_frame, wrap='word', font=('Courier', 10))
-                    scrollbar = ttk.Scrollbar(text_frame, orient='vertical', command=text_widget.yview)
-                    text_widget.configure(yscrollcommand=scrollbar.set)
-                    
-                    text_widget.pack(side='left', fill='both', expand=True)
-                    scrollbar.pack(side='right', fill='y')
-                    
-                    text_widget.insert('1.0', report)
-                    text_widget.config(state='disabled')
-                    
-                    messagebox.showinfo("Успех", f"Отчет сохранен в файл: {filename}")
-                else:
-                    messagebox.showinfo("Информация", f"Задачи для сотрудника {username} не найдены")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при создании отчета: {str(e)}")
+                for task in tasks:
+                    report += f"Задача ID: {task[0]}, Описание: {task[2]}, Статус: {task[3]}, Дата создания: {task[4]}, Дата выполнения: {task[5]}, Создана кем: {task[6]}\n"
 
-    def print_work_report(self, user_id):
-        fields = {
-            'Дата начала': 'text',
-            'Дата окончания': 'text'
-        }
-        self.create_form_window("Отчет о проделанной работе", fields, lambda values: self.handle_work_report(values, user_id))
+            if report:
 
-    def handle_work_report(self, values, user_id):
-        start_date = values['Дата начала']
-        end_date = values['Дата окончания']
-        
-        try:
-            with sqlite3.connect("tasks_db.db") as db:
-                cursor = db.cursor()
-                cursor.execute("""
-                    SELECT t.id, t.description, t.status, t.created_at, t.completed_at, u.username
-                    FROM tasks t
-                    LEFT JOIN users u ON t.created_by = u.username
-                    WHERE t.user_id = ?
-                    AND date(t.created_at) BETWEEN date(?) AND date(?)
-                    ORDER BY t.created_at
-                """, (user_id, start_date, end_date))
-                
-                tasks = cursor.fetchall()
-                if tasks:
-                    report = f"Отчет о проделанной работе с {start_date} по {end_date}\n\n"
-                    report += "=" * 80 + "\n\n"
-                    
-                    for task in tasks:
-                        report += f"ID задачи: {task[0]}\n"
-                        report += f"Описание: {task[1]}\n"
-                        report += f"Статус: {task[2]}\n"
-                        report += f"Дата создания: {task[3]}\n"
-                        report += f"Дата выполнения: {task[4] or 'Не выполнено'}\n"
-                        report += f"Создана: {task[5]}\n"
-                        report += "-" * 40 + "\n"
-                    
-                    
-                    filename = f"work_report_{start_date}_{end_date}.txt"
-                    with open(filename, 'w', encoding='utf-8') as f:
-                        f.write(report)
-                    
-                    
-                    report_window = tk.Toplevel(self.root)
-                    report_window.title("Отчет о проделанной работе")
-                    report_window.geometry("800x600")
-                    report_window.configure(bg=self.style['bg_color'])
-                    
-                    
-                    text_frame = tk.Frame(report_window, bg=self.style['bg_color'])
-                    text_frame.pack(fill='both', expand=True, padx=20, pady=20)
-                    
-                    text_widget = tk.Text(text_frame, wrap='word', font=('Courier', 10))
-                    scrollbar = ttk.Scrollbar(text_frame, orient='vertical', command=text_widget.yview)
-                    text_widget.configure(yscrollcommand=scrollbar.set)
-                    
-                    text_widget.pack(side='left', fill='both', expand=True)
-                    scrollbar.pack(side='right', fill='y')
-                    
-                    text_widget.insert('1.0', report)
-                    text_widget.config(state='disabled')
-                    
-                    messagebox.showinfo("Успех", f"Отчет сохранен в файл: {filename}")
-                else:
-                    messagebox.showinfo("Информация", "Нет задач за указанный период")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Ошибка при создании отчета: {str(e)}")
+                with open(f"employee_tasks_report_{username}.txt", "w") as file:
+                    file.write(report)
+                messagebox.showinfo("Отчет", f"Отчет сохранен в файл 'employee_tasks_report_{username}.txt'.\n{report}")
+            else:
+                messagebox.showinfo("Отчет", "Нет задач для данного сотрудника.")
 
     def view_tasks(self, user_id):
         task_window = tk.Toplevel(self.root)
         task_window.title("Список задач")
-        task_window.geometry("800x600")
-        task_window.configure(bg=self.style['bg_color'])
 
-       
-        header = tk.Label(task_window,
-                         text="Список задач",
-                         font=self.style['header_font'],
-                         bg=self.style['bg_color'],
-                         fg=self.style['label_fg'])
-        header.pack(pady=20)
+        self.task_listbox = tk.Listbox(task_window, width=100)
+        self.task_listbox.pack(pady=20)
 
-        
-        list_frame = tk.Frame(task_window, bg=self.style['bg_color'])
-        list_frame.pack(fill='both', expand=True, padx=20)
-
-        
-        columns = ('ID', 'Описание', 'Статус', 'Дата создания', 'Дата выполнения', 'Создана кем')
-        self.task_tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=20)
-
-        
-        for col in columns:
-            self.task_tree.heading(col, text=col)
-            self.task_tree.column(col, width=100)
-        self.task_tree.column('Описание', width=200)
-
-        
-        scrollbar = ttk.Scrollbar(list_frame, orient='vertical', command=self.task_tree.yview)
-        self.task_tree.configure(yscrollcommand=scrollbar.set)
-
-       
-        self.task_tree.pack(side='left', fill='both', expand=True)
-        scrollbar.pack(side='right', fill='y')
-
-        
         with sqlite3.connect("tasks_db.db") as db:
             cursor = db.cursor()
-            cursor.execute("""
-                SELECT t.id, t.description, t.status, t.created_at, t.completed_at, u.username
-                FROM tasks t
-                LEFT JOIN users u ON t.created_by = u.username
-                WHERE t.user_id = ?
-                ORDER BY t.created_at DESC
-            """, (user_id,))
+            cursor.execute("SELECT * FROM tasks WHERE user_id = ?", (user_id,))
             tasks = cursor.fetchall()
-            
             for task in tasks:
-                self.task_tree.insert('', 'end', values=task)
-
-        
-        button_frame = tk.Frame(task_window, bg=self.style['bg_color'])
-        button_frame.pack(pady=20)
-
-        if hasattr(self, 'current_user') and self.current_user[3] == 'admin':
-            buttons = [
-                ("Изменить статус", self.change_task_status),
-                ("Обновить список", lambda: self.refresh_tasks(user_id)),
-                ("Закрыть", task_window.destroy)
-            ]
-        else:
-            buttons = [
-                ("Изменить статус", self.change_user_task_status),
-                ("Обновить список", lambda: self.refresh_tasks(user_id)),
-                ("Закрыть", task_window.destroy)
-            ]
-
-        for text, command in buttons:
-            tk.Button(button_frame,
-                     text=text,
-                     command=command,
-                     bg=self.style['button_bg'],
-                     fg=self.style['button_fg'],
-                     font=self.style['font_family'],
-                     width=15,
-                     relief=tk.FLAT).pack(side='left', padx=5)
-
-    def refresh_tasks(self, user_id):
-        try:
-            if not hasattr(self, 'task_tree') or not self.task_tree.winfo_exists():
-                return
-            
-            
-            for item in self.task_tree.get_children():
-                self.task_tree.delete(item)
-                
-        
-            with sqlite3.connect("tasks_db.db") as db:
-                cursor = db.cursor()
-                cursor.execute("""
-                    SELECT t.id, t.description, t.status, t.created_at, t.completed_at, t.created_by, u.username
-                    FROM tasks t
-                    JOIN users u ON t.user_id = u.id
-                    WHERE t.user_id = ?
-                    ORDER BY 
-                        CASE 
-                            WHEN t.status = 'в работе' THEN 1
-                            WHEN t.status = 'ожидает' THEN 2
-                            WHEN t.status = 'выполнено' THEN 3
-                        END,
-                        t.created_at DESC
-                """, (user_id,))
-                tasks = cursor.fetchall()
-                
-                for task in tasks:
-                    task_id, desc, status, created, completed, created_by, username = task
-                    created = datetime.strptime(created, '%Y-%m-%d %H:%M:%S').strftime('%d.%m.%Y %H:%M')
-                    completed = datetime.strptime(completed, '%Y-%m-%d %H:%M:%S').strftime('%d.%m.%Y %H:%M') if completed else ''
-                
-                    self.task_tree.insert('', 'end', values=(task_id, desc, status, created, completed, created_by, username))
-        except sqlite3.Error as e:
-            messagebox.showerror("Ошибка базы данных", f"Ошибка при обновлении списка задач: {str(e)}")
-            print(f"Database error during task refresh: {str(e)}")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Произошла ошибка при обновлении списка задач: {str(e)}")
-            print(f"General error during task refresh: {str(e)}")
+                self.task_listbox.insert(tk.END, f"ID: {task[0]}, Описание: {task[2]}, Статус: {task[3]}, Дата создания: {task[4]}, Дата выполнения: {task[5]}, Создана кем: {task[6]}")
 
 if __name__ == "__main__":
     root = tk.Tk()
